@@ -17,20 +17,20 @@ from supabase import create_client
 parts = []
 
 
-async def pistols():
+async def slings_and_swivels():
     async with async_playwright() as p:
         parts_count = 0
         bad_counter = 0
         page_number = 1
-        pistols_url = "https://palmettostatearmory.com/ar-15/pistols.html?p=1"
-        pistols_url = pistols_url[0:pistols_url.index("?p=")] + "?p=" + str(
+        page_url = "https://palmettostatearmory.com/gun-parts/ar-parts/slings.html?p=1"
+        page_url = page_url[0:page_url.index("?p=")] + "?p=" + str(
             page_number)
         print("started")
         browser = await p.firefox.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
         await stealth_async(page)
-        await page.goto(pistols_url)
+        await page.goto(page_url)
         await page.wait_for_load_state('networkidle')
         all_product_names = []
         age_button = page.get_by_role("button", name="Yes")
@@ -66,11 +66,11 @@ async def pistols():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if "kit" in product_name:
-                        await page.goto(pistols_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     if product_name == "Name not found":
-                        await page.goto(pistols_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_price = await page.evaluate('''() => {
@@ -78,7 +78,7 @@ async def pistols():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if product_price == "Name not found":
-                        await page.goto(pistols_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         bad_counter += 1
                         continue
@@ -87,275 +87,16 @@ async def pistols():
                         const element = document.querySelector('.fotorama__stage__frame');
                         return element ? element.getAttribute('href') : 'Image not found';
                     }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(pistols_url)
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_manufacturer_name = await page.evaluate('''() => {
                                 const element = document.querySelector('.col.data[data-th="Brand"]');
                                 return element ? element.textContent.trim() : 'Brand text not found';
                             }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(pistols_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    new_part = Part.Part(product_name, product_price,
-                                         product_image_url,
-                                         page.url,
-                                         product_manufacturer_name,
-                                         upper=True,
-                                         charging_handle=True,
-                                         lower=True, bcg=True,
-                                         attachment=False)
-                    generate_nano_id(new_part)
-                    print(new_part.__str__())
-                    parts.append({"id": new_part.id,
-                                  "name": new_part.name,
-                                  "price": float(
-                                      new_part.price[1:].replace(',', '')),
-                                  "image_url": new_part.image_url,
-                                  "url": new_part.url,
-                                  "manufacturer": new_part.manufacturer,
-                                  "upper": new_part.upper,
-                                  "charging_handle": new_part.charging_handle,
-                                  "bcg": new_part.bcg,
-                                  "lower": new_part.lower,
-                                  "attachment": new_part.attachment
-                                  })
-                    #parts_count += 1
-                    #if parts_count >= 2:
-                    #    break
-                    await page.goto(pistols_url)
-                    await page.wait_for_load_state('networkidle')
-                except Exception as e:
-                    continue
-
-            #if parts_count >= 2:
-            #    break
-
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                pistols_url = pistols_url[
-                             0:pistols_url.index("?p=")] + \
-                             "?p=" + str(page_number)
-                await page.goto(pistols_url)
-            else:
-                print("Finished")
-                break
-
-
-async def rifles():
-    async with async_playwright() as p:
-        parts_count = 0
-        bad_counter = 0
-        page_number = 1 # start at 1 for normal behavior
-        rifles_url = "https://palmettostatearmory.com/ar-15/rifles.html?p=1"
-        rifles_url = rifles_url[0:rifles_url.index("?p=")] + "?p=" + str(
-            page_number)
-        print("started")
-        browser = await p.firefox.launch(headless=True)
-        context = await browser.new_context()
-        page = await context.new_page()
-        await stealth_async(page)
-        await page.goto(rifles_url)
-        await page.wait_for_load_state('networkidle')
-        all_product_names = []
-        age_button = page.get_by_role("button", name="Yes")
-        await age_button.click(button="left", timeout=30000)
-        while True:
-            print("\n" + page.url)
-            time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
-
-            # Extract the product names from the current page
-            product_names = await page.evaluate('''() => {
-                const names = [];
-                document.querySelectorAll('.product-item-link').forEach(element => {
-                    names.push(element.href.trim());
-                });
-                return names;
-            }''')
-            for link in product_names:
-                try:
-                    if bad_counter >= 3:
-                        return 0
-                    if "kit" in link:
-                        continue
-                    await page.goto(link)
-                    await page.wait_for_load_state('networkidle')
-                    product_name = await page.evaluate('''() => {
-                        const element = document.querySelector('.page-title');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if "kit" in product_name:
-                        await page.goto(rifles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    if product_name == "Name not found":
-                        await page.goto(rifles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_price = await page.evaluate('''() => {
-                        const element = document.querySelector('.final-price');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if product_price == "Name not found":
-                        await page.goto(rifles_url)
-                        await page.wait_for_load_state('networkidle')
-                        bad_counter += 1
-                        continue
-
-                    product_image_url = await page.evaluate('''() => {
-                        const element = document.querySelector('.fotorama__stage__frame');
-                        return element ? element.getAttribute('href') : 'Image not found';
-                    }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(rifles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_manufacturer_name = await page.evaluate('''() => {
-                                const element = document.querySelector('.col.data[data-th="Brand"]');
-                                return element ? element.textContent.trim() : 'Brand text not found';
-                            }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(rifles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    new_part = Part.Part(product_name, product_price,
-                                         product_image_url,
-                                         page.url,
-                                         product_manufacturer_name,
-                                         upper=True,
-                                         charging_handle=True,
-                                         lower=True, bcg=True,
-                                         attachment=False)
-                    generate_nano_id(new_part)
-                    print(new_part.__str__())
-                    parts.append({"id": new_part.id,
-                                  "name": new_part.name,
-                                  "price": float(
-                                      new_part.price[1:].replace(',', '')),
-                                  "image_url": new_part.image_url,
-                                  "url": new_part.url,
-                                  "manufacturer": new_part.manufacturer,
-                                  "upper": new_part.upper,
-                                  "charging_handle": new_part.charging_handle,
-                                  "bcg": new_part.bcg,
-                                  "lower": new_part.lower,
-                                  "attachment": new_part.attachment
-                                  })
-                    bad_counter = 0
-                    #parts_count += 1
-                    #if parts_count >= 2:
-                    #    break
-                    await page.goto(rifles_url)
-                    await page.wait_for_load_state('networkidle')
-                except Exception as e:
-                    continue
-            #if parts_count >= 2:
-            #    break
-
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                rifles_url = rifles_url[
-                             0:rifles_url.index("?p=")] + \
-                             "?p=" + str(page_number)
-                await page.goto(rifles_url)
-            else:
-                print("Finished")
-                break
-
-
-async def lowers():
-    async with async_playwright() as p:
-        bad_counter = 0
-        parts_count = 0
-        page_number = 1
-        lowers_url = ("https://palmettostatearmory.com/ar-15/lowers"
-                      "/complete-lowers.html?p=1")
-        lowers_url = lowers_url[0:lowers_url.index("?p=")] + "?p=" + str(
-            page_number)
-        print("started")
-        browser = await p.firefox.launch(headless=True)
-        context = await browser.new_context()
-        page = await context.new_page()
-        await stealth_async(page)
-        await page.goto(lowers_url)
-        await page.wait_for_load_state('networkidle')
-        all_product_names = []
-        age_button = page.get_by_role("button", name="Yes")
-        await age_button.click(button="left", timeout=30000)
-        while True:
-            print("\n" + page.url)
-            time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
-
-            # Extract the product names from the current page
-            product_names = await page.evaluate('''() => {
-                const names = [];
-                document.querySelectorAll('.product-item-link').forEach(element => {
-                    names.push(element.href.trim());
-                });
-                return names;
-            }''')
-
-            for link in product_names:
-                try:
-                    if bad_counter >= 3:
-                        continue
-                    if "kit" in link:
-                        continue
-                    try:
-                        await page.goto(link)
-                    except Exception as e:
-                        continue
-                    await page.wait_for_load_state('networkidle')
-                    product_name = await page.evaluate('''() => {
-                        const element = document.querySelector('.page-title');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if "kit" in product_name:
-                        await page.goto(lowers_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    if product_name == "Name not found":
-                        await page.goto(lowers_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_price = await page.evaluate('''() => {
-                        const element = document.querySelector('.final-price');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if product_price == "Name not found":
-                        await page.goto(lowers_url)
-                        await page.wait_for_load_state('networkidle')
-                        bad_counter += 1
-                        continue
-
-                    product_image_url = await page.evaluate('''() => {
-                        const element = document.querySelector('.fotorama__stage__frame');
-                        return element ? element.getAttribute('href') : 'Image not found';
-                    }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(lowers_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_manufacturer_name = await page.evaluate('''() => {
-                                const element = document.querySelector('.col.data[data-th="Brand"]');
-                                return element ? element.textContent.trim() : 'Brand text not found';
-                            }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(lowers_url)
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     new_part = Part.Part(product_name, product_price,
@@ -364,142 +105,8 @@ async def lowers():
                                          product_manufacturer_name,
                                          upper=False,
                                          charging_handle=False,
-                                         lower=True, bcg=False,
-                                         attachment=False)
-                    generate_nano_id(new_part)
-                    print(new_part.__str__())
-                    parts.append({"id": new_part.id,
-                                  "name": new_part.name,
-                                  "price": float(
-                                      new_part.price[1:].replace(',', '')),
-                                  "image_url": new_part.image_url,
-                                  "url": new_part.url,
-                                  "manufacturer": new_part.manufacturer,
-                                  "upper": new_part.upper,
-                                  "charging_handle": new_part.charging_handle,
-                                  "bcg": new_part.bcg,
-                                  "lower": new_part.lower,
-                                  "attachment": new_part.attachment
-                                  })
-                    #parts_count += 1
-                    #if parts_count >= 2:
-                    #    break
-                    await page.goto(lowers_url)
-                    await page.wait_for_load_state('networkidle')
-                except Exception as e:
-                    continue
-
-            #if parts_count >= 2:
-            #    break
-
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                lowers_url = lowers_url[
-                             0:lowers_url.index("?p=")] + \
-                             "?p=" + str(page_number)
-                await page.goto(lowers_url)
-            else:
-                print("Finished")
-                break
-
-
-async def charging_handles():
-    async with async_playwright() as p:
-        bad_counter = 0
-        parts_count = 0
-        page_number = 1
-        charging_handles_url = "https://palmettostatearmory.com/ar-15/parts" \
-                               "/upper-parts/charging-handles.html?p=1"
-        charging_handles_url = charging_handles_url[
-                               0:charging_handles_url.index(
-                                   "?p=")] + "?p=" + str(
-            page_number)
-        print("started")
-        browser = await p.firefox.launch(headless=True)
-        context = await browser.new_context()
-        page = await context.new_page()
-        await stealth_async(page)
-        await page.goto(charging_handles_url)
-        await page.wait_for_load_state('networkidle')
-        all_product_names = []
-        age_button = page.get_by_role("button", name="Yes")
-        await age_button.click(button="left", timeout=30000)
-        while True:
-            print("\n" + page.url)
-            time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
-
-            # Extract the product names from the current page
-            product_names = await page.evaluate('''() => {
-                const names = [];
-                document.querySelectorAll('.product-item-link').forEach(element => {
-                    names.push(element.href.trim());
-                });
-                return names;
-            }''')
-
-            for link in product_names:
-                try:
-                    if bad_counter >= 3:
-                        continue
-                    if "kit" in link:
-                        continue
-                    try:
-                        await page.goto(link)
-                    except Exception as e:
-                        continue
-                    await page.wait_for_load_state('networkidle')
-                    product_name = await page.evaluate('''() => {
-                        const element = document.querySelector('.page-title');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if "kit" in product_name:
-                        await page.goto(charging_handles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    if product_name == "Name not found":
-                        await page.goto(charging_handles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_price = await page.evaluate('''() => {
-                        const element = document.querySelector('.final-price');
-                        return element ? element.textContent.trim() : 'Name not found';
-                    }''')
-                    if product_price == "Name not found":
-                        await page.goto(charging_handles_url)
-                        await page.wait_for_load_state('networkidle')
-                        bad_counter += 1
-                        continue
-
-                    product_image_url = await page.evaluate('''() => {
-                        const element = document.querySelector('.fotorama__stage__frame');
-                        return element ? element.getAttribute('href') : 'Image not found';
-                    }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(charging_handles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    product_manufacturer_name = await page.evaluate('''() => {
-                                const element = document.querySelector('.col.data[data-th="Brand"]');
-                                return element ? element.textContent.trim() : 'Brand text not found';
-                            }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(charging_handles_url)
-                        await page.wait_for_load_state('networkidle')
-                        continue
-                    new_part = Part.Part(product_name, product_price,
-                                         product_image_url,
-                                         page.url,
-                                         product_manufacturer_name,
-                                         upper=False,
-                                         charging_handle=True,
                                          lower=False, bcg=False,
-                                         attachment=False)
+                                         attachment=True)
                     generate_nano_id(new_part)
                     print(new_part.__str__())
                     parts.append({"id": new_part.id,
@@ -518,7 +125,7 @@ async def charging_handles():
                     #parts_count += 1
                     #if parts_count >= 2:
                     #    break
-                    await page.goto(charging_handles_url)
+                    await page.goto(page_url)
                     await page.wait_for_load_state('networkidle')
                 except Exception as e:
                     continue
@@ -526,37 +133,40 @@ async def charging_handles():
             #if parts_count >= 2:
             #    break
 
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                charging_handles_url = charging_handles_url[
-                                       0:charging_handles_url.index("?p=")] + \
-                                       "?p=" + str(page_number)
-                await page.goto(charging_handles_url)
+            if await page.query_selector('a[title="Next"]'): #if the next button exists
+                next_button_enabled = await page.query_selector(
+                    'a[title="Next"][disabled]') is None
+                time.sleep(2)
+                if next_button_enabled:
+                    print(next_button_enabled)
+                    print("button is enabled")
+                    page_number += 1
+                    page_url = page_url[
+                                 0:page_url.index("?p=")] + \
+                                 "?p=" + str(page_number)
+                    await page.goto(page_url)
+                else:
+                    print("Finished")
+                    break
             else:
                 print("Finished")
                 break
 
 
-async def bcgs():
+async def flashlights():
     async with async_playwright() as p:
-        bad_counter = 0
         parts_count = 0
+        bad_counter = 0
         page_number = 1
-        bcgs_url = "https://palmettostatearmory.com/ar-15/parts" \
-                   "/upper-parts/bolt-carrier-groups/complete" \
-                   ".html?p=1"
-        bcgs_url = bcgs_url[0:bcgs_url.index("?p=")] + "?p=" + str(
+        page_url = "https://palmettostatearmory.com/accessories/flashlights/weapon-lights.html?p=1"
+        page_url = page_url[0:page_url.index("?p=")] + "?p=" + str(
             page_number)
         print("started")
         browser = await p.firefox.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
         await stealth_async(page)
-        await page.goto(bcgs_url)
+        await page.goto(page_url)
         await page.wait_for_load_state('networkidle')
         all_product_names = []
         age_button = page.get_by_role("button", name="Yes")
@@ -592,11 +202,11 @@ async def bcgs():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if "kit" in product_name:
-                        await page.goto(bcgs_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     if product_name == "Name not found":
-                        await page.goto(bcgs_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_price = await page.evaluate('''() => {
@@ -604,7 +214,7 @@ async def bcgs():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if product_price == "Name not found":
-                        await page.goto(bcgs_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         bad_counter += 1
                         continue
@@ -613,16 +223,16 @@ async def bcgs():
                         const element = document.querySelector('.fotorama__stage__frame');
                         return element ? element.getAttribute('href') : 'Image not found';
                     }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(bcgs_url)
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_manufacturer_name = await page.evaluate('''() => {
                                 const element = document.querySelector('.col.data[data-th="Brand"]');
                                 return element ? element.textContent.trim() : 'Brand text not found';
                             }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(bcgs_url)
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     new_part = Part.Part(product_name, product_price,
@@ -631,8 +241,8 @@ async def bcgs():
                                          product_manufacturer_name,
                                          upper=False,
                                          charging_handle=False,
-                                         lower=False, bcg=True,
-                                         attachment=False)
+                                         lower=False, bcg=False,
+                                         attachment=True)
                     generate_nano_id(new_part)
                     print(new_part.__str__())
                     parts.append({"id": new_part.id,
@@ -651,42 +261,48 @@ async def bcgs():
                     #parts_count += 1
                     #if parts_count >= 2:
                     #    break
-                    await page.goto(bcgs_url)
+                    await page.goto(page_url)
                     await page.wait_for_load_state('networkidle')
                 except Exception as e:
                     continue
+
             #if parts_count >= 2:
             #    break
 
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                bcgs_url = bcgs_url[
-                           0:bcgs_url.index("?p=")] + \
-                           "?p=" + str(page_number)
-                await page.goto(bcgs_url)
+            if await page.query_selector('a[title="Next"]'): #if the next button exists
+                next_button_enabled = await page.query_selector(
+                    'a[title="Next"][disabled]') is None
+                time.sleep(2)
+                if next_button_enabled:
+                    print(next_button_enabled)
+                    print("button is enabled")
+                    page_number += 1
+                    page_url = page_url[
+                                 0:page_url.index("?p=")] + \
+                                 "?p=" + str(page_number)
+                    await page.goto(page_url)
+                else:
+                    print("Finished")
+                    break
             else:
                 print("Finished")
                 break
 
 
-async def uppers():
+async def flashlight_mounts():
     async with async_playwright() as p:
-        bad_counter = 0
         parts_count = 0
+        bad_counter = 0
         page_number = 1
-        uppers_url = "https://palmettostatearmory.com/ar-15/barreled-upper-assemblies.html?p=1"
-        uppers_url = uppers_url[0:uppers_url.index("?p=")] + "?p=" + str(
+        page_url = "https://palmettostatearmory.com/accessories/flashlights/flashlight-mounts.html?p=1"
+        page_url = page_url[0:page_url.index("?p=")] + "?p=" + str(
             page_number)
         print("started")
         browser = await p.firefox.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
         await stealth_async(page)
-        await page.goto(uppers_url)
+        await page.goto(page_url)
         await page.wait_for_load_state('networkidle')
         all_product_names = []
         age_button = page.get_by_role("button", name="Yes")
@@ -722,26 +338,11 @@ async def uppers():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if "kit" in product_name:
-                        await page.goto(uppers_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
-                    bcg = True
-                    charging_handle = True
-                    if re.search(
-                            '(without.*(?:bcg|bolt\s+carrier\s+group)|w/o.*('
-                            '?:bcg|bolt\s+carrier\s+group)|no.*('
-                            '?:bcg|bolt\s+carrier\s+group))',
-                            product_name.lower()):
-                        bcg = False
-                    if re.search(
-                            '(without.*(?:ch|charging\s+handle)|w/o.*('
-                            '?:ch|charging\s+handle)|no.*('
-                            '?:ch|charging\s+handle))',
-                            product_name.lower()):
-                        charging_handle = False
-
                     if product_name == "Name not found":
-                        await page.goto(uppers_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_price = await page.evaluate('''() => {
@@ -749,7 +350,7 @@ async def uppers():
                         return element ? element.textContent.trim() : 'Name not found';
                     }''')
                     if product_price == "Name not found":
-                        await page.goto(uppers_url)
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         bad_counter += 1
                         continue
@@ -758,16 +359,16 @@ async def uppers():
                         const element = document.querySelector('.fotorama__stage__frame');
                         return element ? element.getAttribute('href') : 'Image not found';
                     }''')
-                    if product_image_url == "Name not found":
-                        await page.goto(uppers_url)
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     product_manufacturer_name = await page.evaluate('''() => {
                                 const element = document.querySelector('.col.data[data-th="Brand"]');
                                 return element ? element.textContent.trim() : 'Brand text not found';
                             }''')
-                    if product_manufacturer_name == "Name not found":
-                        await page.goto(uppers_url)
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
                         continue
                     new_part = Part.Part(product_name, product_price,
@@ -775,9 +376,9 @@ async def uppers():
                                          page.url,
                                          product_manufacturer_name,
                                          upper=False,
-                                         charging_handle=charging_handle,
-                                         lower=False, bcg=bcg,
-                                         attachment=False)
+                                         charging_handle=False,
+                                         lower=False, bcg=False,
+                                         attachment=True)
                     generate_nano_id(new_part)
                     print(new_part.__str__())
                     parts.append({"id": new_part.id,
@@ -796,23 +397,165 @@ async def uppers():
                     #parts_count += 1
                     #if parts_count >= 2:
                     #    break
-                    await page.goto(uppers_url)
+                    await page.goto(page_url)
                     await page.wait_for_load_state('networkidle')
                 except Exception as e:
                     continue
+
             #if parts_count >= 2:
             #    break
 
-            next_button_enabled = await page.query_selector(
-                'a[title="Next"][disabled]') is None
-            time.sleep(2)
-            if next_button_enabled:
-                print("button is enabled")
-                page_number += 1
-                uppers_url = uppers_url[
-                             0:uppers_url.index("?p=")] + \
-                             "?p=" + str(page_number)
-                await page.goto(uppers_url)
+            if await page.query_selector('a[title="Next"]'): #if the next button exists
+                next_button_enabled = await page.query_selector(
+                    'a[title="Next"][disabled]') is None
+                time.sleep(2)
+                if next_button_enabled:
+                    print(next_button_enabled)
+                    print("button is enabled")
+                    page_number += 1
+                    page_url = page_url[
+                                 0:page_url.index("?p=")] + \
+                                 "?p=" + str(page_number)
+                    await page.goto(page_url)
+                else:
+                    print("Finished")
+                    break
+            else:
+                print("Finished")
+                break
+
+
+async def stocks():
+    async with async_playwright() as p:
+        parts_count = 0
+        bad_counter = 0
+        page_number = 1
+        page_url = "https://palmettostatearmory.com/ar-15/parts/lower-parts/stocks.html?p=1"
+        page_url = page_url[0:page_url.index("?p=")] + "?p=" + str(
+            page_number)
+        print("started")
+        browser = await p.firefox.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
+        await page.goto(page_url)
+        await page.wait_for_load_state('networkidle')
+        all_product_names = []
+        age_button = page.get_by_role("button", name="Yes")
+        await age_button.click(button="left", timeout=30000)
+        while True:
+            print("\n" + page.url)
+            time.sleep(3)
+            await page.wait_for_load_state('networkidle')
+            await page.wait_for_selector('.product-item-link')
+
+            # Extract the product names from the current page
+            product_names = await page.evaluate('''() => {
+                const names = [];
+                document.querySelectorAll('.product-item-link').forEach(element => {
+                    names.push(element.href.trim());
+                });
+                return names;
+            }''')
+
+            for link in product_names:
+                try:
+                    if bad_counter >= 3:
+                        continue
+                    if "kit" in link:
+                        continue
+                    try:
+                        await page.goto(link)
+                    except Exception as e:
+                        continue
+                    await page.wait_for_load_state('networkidle')
+                    product_name = await page.evaluate('''() => {
+                        const element = document.querySelector('.page-title');
+                        return element ? element.textContent.trim() : 'Name not found';
+                    }''')
+                    if "kit" in product_name:
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    if product_name == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_price = await page.evaluate('''() => {
+                        const element = document.querySelector('.final-price');
+                        return element ? element.textContent.trim() : 'Name not found';
+                    }''')
+                    if product_price == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        bad_counter += 1
+                        continue
+
+                    product_image_url = await page.evaluate('''() => {
+                        const element = document.querySelector('.fotorama__stage__frame');
+                        return element ? element.getAttribute('href') : 'Image not found';
+                    }''')
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_manufacturer_name = await page.evaluate('''() => {
+                                const element = document.querySelector('.col.data[data-th="Brand"]');
+                                return element ? element.textContent.trim() : 'Brand text not found';
+                            }''')
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    new_part = Part.Part(product_name, product_price,
+                                         product_image_url,
+                                         page.url,
+                                         product_manufacturer_name,
+                                         upper=False,
+                                         charging_handle=False,
+                                         lower=False, bcg=False,
+                                         attachment=True)
+                    generate_nano_id(new_part)
+                    print(new_part.__str__())
+                    parts.append({"id": new_part.id,
+                                  "name": new_part.name,
+                                  "price": float(
+                                      new_part.price[1:].replace(',', '')),
+                                  "image_url": new_part.image_url,
+                                  "url": new_part.url,
+                                  "manufacturer": new_part.manufacturer,
+                                  "upper": new_part.upper,
+                                  "charging_handle": new_part.charging_handle,
+                                  "bcg": new_part.bcg,
+                                  "lower": new_part.lower,
+                                  "attachment": new_part.attachment
+                                  })
+                    #parts_count += 1
+                    #if parts_count >= 2:
+                    #    break
+                    await page.goto(page_url)
+                    await page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    continue
+
+            #if parts_count >= 2:
+            #    break
+
+            if await page.query_selector('a[title="Next"]'): #if the next button exists
+                next_button_enabled = await page.query_selector(
+                    'a[title="Next"][disabled]') is None
+                time.sleep(2)
+                if next_button_enabled:
+                    print(next_button_enabled)
+                    print("button is enabled")
+                    page_number += 1
+                    page_url = page_url[
+                                 0:page_url.index("?p=")] + \
+                                 "?p=" + str(page_number)
+                    await page.goto(page_url)
+                else:
+                    print("Finished")
+                    break
             else:
                 print("Finished")
                 break
@@ -875,22 +618,14 @@ def upload_parts():
                 response = supabase.table(table_name).update({'name': part["name"], 'price': part["price"], 'url': part["url"], 'image_url': part["image_url"]}).eq(column='name', value=part["name"]).execute()
 
 
-asyncio.run(pistols())
+
+
+parts = []
+asyncio.run(flashlights())
 upload_parts()
 parts = []
-asyncio.run(rifles())
+asyncio.run(flashlight_mounts())
 upload_parts()
 parts = []
-asyncio.run(lowers())
-upload_parts()
-parts = []
-asyncio.run(uppers())
-upload_parts()
-parts = []
-asyncio.run(charging_handles())
-upload_parts()
-parts = []
-asyncio.run(bcgs())
-upload_parts()
-parts = []
+asyncio.run(stocks())
 upload_parts()
