@@ -76,7 +76,9 @@ async def uppers():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -85,7 +87,7 @@ async def uppers():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=True,
                                      charging_handle=False,
@@ -173,7 +175,9 @@ async def charging_handles():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_price == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -182,7 +186,7 @@ async def charging_handles():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=True,

@@ -142,10 +142,10 @@ async def pistols():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    pistols_url = pistols_url[
+                               0:pistols_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(pistols_url)
                 else:
                     print("Finished")
                     break
@@ -275,10 +275,10 @@ async def rifles():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    rifles_url = rifles_url[
+                               0:rifles_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(rifles_url)
                 else:
                     print("Finished")
                     break
@@ -413,10 +413,10 @@ async def lowers():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    lowers_url = lowers_url[
+                               0:lowers_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(lowers_url)
                 else:
                     print("Finished")
                     break
@@ -553,10 +553,10 @@ async def charging_handles():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    charging_handles_url = charging_handles_url[
+                               0:charging_handles_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(charging_handles_url)
                 else:
                     print("Finished")
                     break
@@ -691,10 +691,10 @@ async def bcgs():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    bcgs_url = bcgs_url[
+                               0:bcgs_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(bcgs_url)
                 else:
                     print("Finished")
                     break
@@ -842,10 +842,10 @@ async def uppers():
                     print(next_button_enabled)
                     print("button is enabled")
                     page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
+                    uppers_url = uppers_url[
+                               0:uppers_url.index("?p=")] + \
                                "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    await page.goto(uppers_url)
                 else:
                     print("Finished")
                     break

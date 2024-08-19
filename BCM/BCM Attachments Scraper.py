@@ -76,7 +76,9 @@ async def handguards():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -85,7 +87,7 @@ async def handguards():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -173,7 +175,9 @@ async def pistol_grips():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -182,7 +186,7 @@ async def pistol_grips():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -270,7 +274,9 @@ async def vertical_grips():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -279,7 +285,7 @@ async def vertical_grips():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -367,7 +373,9 @@ async def optics():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -376,7 +384,7 @@ async def optics():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -464,7 +472,9 @@ async def optic_mounts():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -473,7 +483,7 @@ async def optic_mounts():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -561,7 +571,9 @@ async def iron_sights():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -570,7 +582,7 @@ async def iron_sights():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -658,7 +670,9 @@ async def stocks():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -667,7 +681,7 @@ async def stocks():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -755,7 +769,9 @@ async def muzzle_devices():
                 if product_price == "N/A":
                     bad_counter += 1
                     continue
-
+                product_url = product['url']
+                if product_url == "N/A":
+                    continue
                 product_image_url = product['urlImage']
                 if product_image_url == "N/A":
                     continue
@@ -764,7 +780,7 @@ async def muzzle_devices():
                     continue
                 new_part = Part.Part(product_name, product_price,
                                      product_image_url,
-                                     page.url,
+                                     product_url,
                                      product_manufacturer_name,
                                      upper=False,
                                      charging_handle=False,
@@ -853,26 +869,26 @@ def upload_parts():
                     column='name', value=part["name"]).execute()
 
 
-#asyncio.run(handguards())
-#upload_parts()
-#parts = []
-#asyncio.run(pistol_grips())
-#upload_parts()
-#parts = []
-#asyncio.run(vertical_grips())
-#upload_parts()
-#parts = []
-#asyncio.run(optics())
-#upload_parts()
-#parts = []
-#asyncio.run(optic_mounts())
-#upload_parts()
-#parts = []
-#asyncio.run(iron_sights())
-#upload_parts()
-#parts = []
-#asyncio.run(stocks())
-#upload_parts()
-#parts = []
+asyncio.run(handguards())
+upload_parts()
+parts = []
+asyncio.run(pistol_grips())
+upload_parts()
+parts = []
+asyncio.run(vertical_grips())
+upload_parts()
+parts = []
+asyncio.run(optics())
+upload_parts()
+parts = []
+asyncio.run(optic_mounts())
+upload_parts()
+parts = []
+asyncio.run(iron_sights())
+upload_parts()
+parts = []
+asyncio.run(stocks())
+upload_parts()
+parts = []
 asyncio.run(muzzle_devices())
 upload_parts()

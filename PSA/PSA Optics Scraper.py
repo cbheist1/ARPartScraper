@@ -279,9 +279,12 @@ async def red_dot_magnifier_combos():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -415,9 +418,12 @@ async def optic_plates():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -551,9 +557,12 @@ async def riser_mounts():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -687,9 +696,12 @@ async def holographic_sights():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -823,9 +835,12 @@ async def ar_iron_sights():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -959,9 +974,12 @@ async def magnifiers():
                     print("button is enabled")
                     page_number += 1
                     page_url = page_url[
-                                 0:page_url.index("?p=")] + \
-                                 "?p=" + str(page_number)
-                    await page.goto(page_url)
+                               0:page_url.index("?p=")] + \
+                               "?p=" + str(page_number)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -1097,7 +1115,10 @@ async def scopes():
                     page_url = page_url[
                                  0:page_url.index("?p=")] + \
                                  "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -1233,7 +1254,10 @@ async def scope_mounts():
                     page_url = page_url[
                                  0:page_url.index("?p=")] + \
                                  "?p=" + str(page_number)
-                    await page.goto(page_url)
+                    try:
+                        await page.goto(page_url)
+                    except Exception as e:
+                        await retry_page(page, page_url)
                 else:
                     print("Finished")
                     break
@@ -1302,29 +1326,29 @@ def upload_parts():
 
 
 
-#asyncio.run(pistol_red_dots())
-#upload_parts()
-#parts = []
-#asyncio.run(red_dot_magnifier_combos())
-#upload_parts()
-#parts = []
-#asyncio.run(optic_plates())
-#upload_parts()
-#parts = []
-#asyncio.run(riser_mounts())
-#upload_parts()
-#parts = []
-#asyncio.run(holographic_sights())
-#upload_parts()
-#parts = []
-#asyncio.run(ar_iron_sights())
-#upload_parts()
-#parts = []
-#asyncio.run(magnifiers())
-#upload_parts()
-#parts = []
-#asyncio.run(scopes())
-#upload_parts()
+asyncio.run(pistol_red_dots())
+upload_parts()
+parts = []
+asyncio.run(red_dot_magnifier_combos())
+upload_parts()
+parts = []
+asyncio.run(optic_plates())
+upload_parts()
+parts = []
+asyncio.run(riser_mounts())
+upload_parts()
+parts = []
+asyncio.run(holographic_sights())
+upload_parts()
+parts = []
+asyncio.run(ar_iron_sights())
+upload_parts()
+parts = []
+asyncio.run(magnifiers())
+upload_parts()
+parts = []
+asyncio.run(scopes())
+upload_parts()
 parts = []
 asyncio.run(scope_mounts())
 upload_parts()
