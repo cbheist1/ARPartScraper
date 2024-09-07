@@ -38,8 +38,11 @@ async def pistol_red_dots():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -175,8 +178,11 @@ async def red_dot_magnifier_combos():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -314,8 +320,11 @@ async def optic_plates():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -453,8 +462,11 @@ async def riser_mounts():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -592,8 +604,11 @@ async def holographic_sights():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -731,8 +746,11 @@ async def ar_iron_sights():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -870,8 +888,11 @@ async def magnifiers():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -1009,8 +1030,11 @@ async def scopes():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -1148,8 +1172,11 @@ async def scope_mounts():
         while True:
             print("\n" + page.url)
             time.sleep(3)
-            await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.product-item-link')
+            try:
+                await page.wait_for_load_state('networkidle')
+                await page.wait_for_selector('.product-item-link')
+            except:
+                continue
 
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
