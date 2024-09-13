@@ -128,23 +128,16 @@ async def complete_rifles():
             # if parts_count >= 2:
             #    break
 
-            if await page.query_selector(
-                    'a[title="Next"]'):  # if the next button exists
-                next_button_enabled = await page.query_selector(
-                    'a[title="Next"][disabled]') is None
+            try:
+                await page.query_selector(
+                    '.global-views-pagination-next')  # if the next button exists
                 time.sleep(2)
-                if next_button_enabled:
-                    print(next_button_enabled)
-                    print("button is enabled")
-                    page_number += 1
-                    page_url = page_url[
-                               0:page_url.index("?p=")] + \
-                               "?p=" + str(page_number)
-                    await page.goto(page_url)
-                else:
-                    print("Finished")
-                    break
-            else:
+                page_number += 1
+                page_url = page_url[
+                           0:page_url.index("?page=")] + \
+                           "?page=" + str(page_number) + "&show=96"
+                await page.goto(page_url)
+            except:
                 print("Finished")
                 break
 
