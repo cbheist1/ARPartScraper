@@ -16,4 +16,5 @@ class Part:
     def __str__(self):
         return (self.id + ", " + self.name + ", " + self.price + (", Charging "
                                                                   "Handle: ")
-                + str(self.charging_handle) + ", bcg: " + str(self.bcg))
+                + str(self.charging_handle) + ", bcg: " + str(self.bcg)
+                + (", Manufacturer: " + str(self.manufacturer)))
