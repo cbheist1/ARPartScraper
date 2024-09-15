@@ -38,8 +38,10 @@ async def complete_rifles():
             print("\n" + page.url)
             time.sleep(3)
             await page.wait_for_load_state('networkidle')
-            await page.wait_for_selector('.facets-item-cell-grid-title')
-
+            try:
+                await page.wait_for_selector('.facets-item-cell-grid-title')
+            except:
+                continue
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
                         const names = [];
@@ -78,9 +80,10 @@ async def complete_rifles():
                         continue
 
                     product_image_url = await page.evaluate('''() => {
-                                const element = document.querySelector('.zoomImg');
+                                const element = document.querySelector('.product-details-image-gallery link[itemprop="image"]');
                                 return element ? element.getAttribute('href') : 'Image not found';
                             }''')
+                    product_image_url = product_image_url.replace(' ', '%20')
                     if product_image_url == "Image not found":
                         await page.goto(page_url)
                         await page.wait_for_load_state('networkidle')
@@ -129,8 +132,8 @@ async def complete_rifles():
             #    break
 
             try:
-                await page.query_selector(
-                    '.global-views-pagination-next')  # if the next button exists
+                next_button_exists = page.locator('.global-views-pagination-next')
+                print("Next: " + next_button_exists)
                 time.sleep(2)
                 page_number += 1
                 page_url = page_url[
@@ -181,7 +184,6 @@ def upload_parts():
     for part in parts:
         #part = {'id': 'YEsdKXSg', 'name': "Toolcraft Logo'd Premium 5.56 Nickel Boron BCG with Carpenter 158 Bolt - 5165449729", 'price': 109.99, 'image_url': 'https://palmettostatearmory.com/media/catalog/product/cache/7af8331bf1196ca28793bd1e8f6ecc7b/5/1/5165449729_052724_3.jpg', 'url': 'https://palmettostatearmory.com/toolcraft-logo-d-premium-5-56-nickel-boron-bcg-with-carpenter-158-bolt-5165449729.html', 'manufacturer': 'Palmetto State Armory', 'upper': False, 'charging_handle': False, 'bcg': True, 'lower': False}
         try:
-            #print("Part: " + str(part))
             response = supabase.table(table_name).insert(part).execute()
         except APIError as e:
             # Handle the specific APIError that indicates a unique constraint

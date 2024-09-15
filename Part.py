@@ -17,4 +17,5 @@ class Part:
         return (self.id + ", " + self.name + ", " + self.price + (", Charging "
                                                                   "Handle: ")
                 + str(self.charging_handle) + ", bcg: " + str(self.bcg)
-                + (", Manufacturer: " + str(self.manufacturer)))
+                + ", Manufacturer: " + str(self.manufacturer) + ", Image URL: "
+                + str(self.image_url))
