@@ -41,6 +41,9 @@ async def complete_rifles():
             try:
                 await page.wait_for_selector('.facets-item-cell-grid-title')
             except:
+                if bad_counter >= 3:
+                    return
+                bad_counter += 1
                 continue
             # Extract the product names from the current page
             product_names = await page.evaluate('''() => {
@@ -132,8 +135,8 @@ async def complete_rifles():
             #    break
 
             try:
-                next_button_exists = page.locator('.global-views-pagination-next')
-                print("Next: " + next_button_exists)
+                print(page.locator('.global-views-pagination-next'))
+                # print("Next: " + next_button_exists)
                 time.sleep(2)
                 page_number += 1
                 page_url = page_url[
