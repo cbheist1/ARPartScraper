@@ -804,7 +804,7 @@ async def uppers():
                                          product_image_url,
                                          page.url,
                                          product_manufacturer_name,
-                                         upper=False,
+                                         upper=True,
                                          charging_handle=charging_handle,
                                          lower=False, bcg=bcg,
                                          attachment=False)
@@ -908,7 +908,7 @@ def upload_parts():
                 #response = supabase.table(table_name).delete().eq('name', part['name']).execute()
                 #response = supabase.table(table_name).insert(part).execute()
                 #response = supabase.table(table_name).upsert({'name': part["name"], 'price': part["price"], 'url': part["url"], 'image_url': part["image_url"]}).execute()
-                response = supabase.table(table_name).update({'name': part["name"], 'price': part["price"], 'url': part["url"], 'image_url': part["image_url"]}).eq(column='name', value=part["name"]).execute()
+                response = supabase.table(table_name).update({'name': part["name"], 'price': part["price"], 'url': part["url"], 'image_url': part["image_url"], 'upper': part["upper"]}).eq(column='name', value=part["name"]).execute()
 
 
 asyncio.run(pistols())

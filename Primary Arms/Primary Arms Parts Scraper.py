@@ -5,13 +5,16 @@ import playwright
 import requests
 import json
 import nanoid
+import stealth
+from playwright_stealth import stealth_async
 from postgrest import APIError
 
 import Part
 import re
 import psutil
+import stealth
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+# from playwright_stealth import stealth_async
 from supabase import create_client
 
 parts = []
@@ -27,7 +30,7 @@ async def complete_rifles():
                       0:page_url.index("?page=")] + "?page=" + str(
             page_number) + "&show=96"
         print("started")
-        browser = await p.firefox.launch(headless=True)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         page = await context.new_page()
         await stealth_async(page)
@@ -148,6 +151,530 @@ async def complete_rifles():
                 break
 
 
+async def bcgs():
+    async with async_playwright() as p:
+        parts_count = 0
+        bad_counter = 0
+        page_number = 1
+        page_url = "https://www.primaryarms.com/ar-15/bolt-carrier-groups?page=1&show=96"
+        page_url = page_url[
+                      0:page_url.index("?page=")] + "?page=" + str(
+            page_number) + "&show=96"
+        print("started")
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
+        await page.goto(page_url)
+        time.sleep(5)
+        all_product_names = []
+        while True:
+            print("\n" + page.url)
+            time.sleep(3)
+            await page.wait_for_load_state('networkidle')
+            try:
+                await page.wait_for_selector('.facets-item-cell-grid-title')
+            except:
+                if bad_counter >= 3:
+                    return
+                bad_counter += 1
+                continue
+            # Extract the product names from the current page
+            product_names = await page.evaluate('''() => {
+                        const names = [];
+                        document.querySelectorAll('.facets-item-cell-grid-title').forEach(element => {
+                            names.push(element.href.trim());
+                        });
+                        return names;
+                    }''')
+            for link in product_names:
+                try:
+                    if bad_counter >= 3:
+                        continue
+                    if "kit" in link:
+                        continue
+                    try:
+                        await page.goto(link)
+                    except Exception as e:
+                        continue
+                    await page.wait_for_load_state('networkidle')
+                    product_name = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-full-content-header-title');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_name == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_price = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-views-price-lead');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_price == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        bad_counter += 1
+                        continue
+
+                    product_image_url = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-image-gallery link[itemprop="image"]');
+                                return element ? element.getAttribute('href') : 'Image not found';
+                            }''')
+                    product_image_url = product_image_url.replace(' ', '%20')
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_manufacturer_name = await page.evaluate('''() => {
+                                        const element = document.querySelector('.item-details-manufacturer');
+                                        return element ? element.textContent.trim() : 'Brand text not found';
+                                    }''')
+                    product_manufacturer_name = product_manufacturer_name[16:]
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    new_part = Part.Part(product_name, product_price,
+                                         product_image_url,
+                                         page.url,
+                                         product_manufacturer_name,
+                                         upper=False,
+                                         charging_handle=False,
+                                         lower=False, bcg=True,
+                                         attachment=False)
+                    generate_nano_id(new_part)
+                    print(new_part.__str__())
+                    parts.append({"id": new_part.id,
+                                  "name": new_part.name,
+                                  "price": float(
+                                      new_part.price[1:].replace(',', '')),
+                                  "image_url": new_part.image_url,
+                                  "url": new_part.url,
+                                  "manufacturer": new_part.manufacturer,
+                                  "upper": new_part.upper,
+                                  "charging_handle": new_part.charging_handle,
+                                  "bcg": new_part.bcg,
+                                  "lower": new_part.lower,
+                                  "attachment": new_part.attachment
+                                  })
+                    # parts_count += 1
+                    # if parts_count >= 2:
+                    #    break
+                    await page.goto(page_url)
+                    await page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    continue
+
+            # if parts_count >= 2:
+            #    break
+
+            try:
+                print(page.locator('.global-views-pagination-next'))
+                # print("Next: " + next_button_exists)
+                time.sleep(2)
+                page_number += 1
+                page_url = page_url[
+                           0:page_url.index("?page=")] + \
+                           "?page=" + str(page_number) + "&show=96"
+                await page.goto(page_url)
+            except:
+                print("Finished")
+                break
+
+
+async def charging_handles():
+    async with async_playwright() as p:
+        parts_count = 0
+        bad_counter = 0
+        page_number = 1
+        page_url = "https://www.primaryarms.com/ar-15/charging-handles?page=1&show=96"
+        page_url = page_url[
+                      0:page_url.index("?page=")] + "?page=" + str(
+            page_number) + "&show=96"
+        print("started")
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
+        await page.goto(page_url)
+        time.sleep(5)
+        all_product_names = []
+        while True:
+            print("\n" + page.url)
+            time.sleep(3)
+            await page.wait_for_load_state('networkidle')
+            try:
+                await page.wait_for_selector('.facets-item-cell-grid-title')
+            except:
+                if bad_counter >= 3:
+                    return
+                bad_counter += 1
+                continue
+            # Extract the product names from the current page
+            product_names = await page.evaluate('''() => {
+                        const names = [];
+                        document.querySelectorAll('.facets-item-cell-grid-title').forEach(element => {
+                            names.push(element.href.trim());
+                        });
+                        return names;
+                    }''')
+            for link in product_names:
+                try:
+                    if bad_counter >= 3:
+                        continue
+                    if "kit" in link:
+                        continue
+                    try:
+                        await page.goto(link)
+                    except Exception as e:
+                        continue
+                    await page.wait_for_load_state('networkidle')
+                    product_name = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-full-content-header-title');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_name == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_price = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-views-price-lead');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_price == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        bad_counter += 1
+                        continue
+
+                    product_image_url = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-image-gallery link[itemprop="image"]');
+                                return element ? element.getAttribute('href') : 'Image not found';
+                            }''')
+                    product_image_url = product_image_url.replace(' ', '%20')
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_manufacturer_name = await page.evaluate('''() => {
+                                        const element = document.querySelector('.item-details-manufacturer');
+                                        return element ? element.textContent.trim() : 'Brand text not found';
+                                    }''')
+                    product_manufacturer_name = product_manufacturer_name[16:]
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    new_part = Part.Part(product_name, product_price,
+                                         product_image_url,
+                                         page.url,
+                                         product_manufacturer_name,
+                                         upper=False,
+                                         charging_handle=True,
+                                         lower=False, bcg=False,
+                                         attachment=False)
+                    generate_nano_id(new_part)
+                    print(new_part.__str__())
+                    parts.append({"id": new_part.id,
+                                  "name": new_part.name,
+                                  "price": float(
+                                      new_part.price[1:].replace(',', '')),
+                                  "image_url": new_part.image_url,
+                                  "url": new_part.url,
+                                  "manufacturer": new_part.manufacturer,
+                                  "upper": new_part.upper,
+                                  "charging_handle": new_part.charging_handle,
+                                  "bcg": new_part.bcg,
+                                  "lower": new_part.lower,
+                                  "attachment": new_part.attachment
+                                  })
+                    # parts_count += 1
+                    # if parts_count >= 2:
+                    #    break
+                    await page.goto(page_url)
+                    await page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    continue
+
+            # if parts_count >= 2:
+            #    break
+
+            try:
+                print(page.locator('.global-views-pagination-next'))
+                # print("Next: " + next_button_exists)
+                time.sleep(2)
+                page_number += 1
+                page_url = page_url[
+                           0:page_url.index("?page=")] + \
+                           "?page=" + str(page_number) + "&show=96"
+                await page.goto(page_url)
+            except:
+                print("Finished")
+                break
+
+
+async def complete_uppers():
+    async with async_playwright() as p:
+        parts_count = 0
+        bad_counter = 0
+        page_number = 1
+        page_url = "https://www.primaryarms.com/ar-15/upper-receivers/complete?page=1&show=96"
+        page_url = page_url[
+                      0:page_url.index("?page=")] + "?page=" + str(
+            page_number) + "&show=96"
+        print("started")
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
+        await page.goto(page_url)
+        time.sleep(5)
+        all_product_names = []
+        while True:
+            print("\n" + page.url)
+            time.sleep(3)
+            await page.wait_for_load_state('networkidle')
+            try:
+                await page.wait_for_selector('.facets-item-cell-grid-title')
+            except:
+                if bad_counter >= 3:
+                    return
+                bad_counter += 1
+                continue
+            # Extract the product names from the current page
+            product_names = await page.evaluate('''() => {
+                        const names = [];
+                        document.querySelectorAll('.facets-item-cell-grid-title').forEach(element => {
+                            names.push(element.href.trim());
+                        });
+                        return names;
+                    }''')
+            for link in product_names:
+                try:
+                    if bad_counter >= 3:
+                        continue
+                    if "kit" in link:
+                        continue
+                    try:
+                        await page.goto(link)
+                    except Exception as e:
+                        continue
+                    await page.wait_for_load_state('networkidle')
+                    product_name = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-full-content-header-title');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_name == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_price = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-views-price-lead');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_price == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        bad_counter += 1
+                        continue
+
+                    product_image_url = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-image-gallery link[itemprop="image"]');
+                                return element ? element.getAttribute('href') : 'Image not found';
+                            }''')
+                    product_image_url = product_image_url.replace(' ', '%20')
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_manufacturer_name = await page.evaluate('''() => {
+                                        const element = document.querySelector('.item-details-manufacturer');
+                                        return element ? element.textContent.trim() : 'Brand text not found';
+                                    }''')
+                    product_manufacturer_name = product_manufacturer_name[16:]
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    new_part = Part.Part(product_name, product_price,
+                                         product_image_url,
+                                         page.url,
+                                         product_manufacturer_name,
+                                         upper=True,
+                                         charging_handle=True,
+                                         lower=False, bcg=True,
+                                         attachment=False)
+                    generate_nano_id(new_part)
+                    print(new_part.__str__())
+                    parts.append({"id": new_part.id,
+                                  "name": new_part.name,
+                                  "price": float(
+                                      new_part.price[1:].replace(',', '')),
+                                  "image_url": new_part.image_url,
+                                  "url": new_part.url,
+                                  "manufacturer": new_part.manufacturer,
+                                  "upper": new_part.upper,
+                                  "charging_handle": new_part.charging_handle,
+                                  "bcg": new_part.bcg,
+                                  "lower": new_part.lower,
+                                  "attachment": new_part.attachment
+                                  })
+                    # parts_count += 1
+                    # if parts_count >= 2:
+                    #    break
+                    await page.goto(page_url)
+                    await page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    continue
+
+            # if parts_count >= 2:
+            #    break
+
+            try:
+                print(page.locator('.global-views-pagination-next'))
+                # print("Next: " + next_button_exists)
+                time.sleep(2)
+                page_number += 1
+                page_url = page_url[
+                           0:page_url.index("?page=")] + \
+                           "?page=" + str(page_number) + "&show=96"
+                await page.goto(page_url)
+            except:
+                print("Finished")
+                break
+
+
+async def complete_lowers():
+    async with async_playwright() as p:
+        parts_count = 0
+        bad_counter = 0
+        page_number = 1
+        page_url = "https://www.primaryarms.com/ar-15/lower-receivers/complete?page=1&show=96"
+        page_url = page_url[
+                      0:page_url.index("?page=")] + "?page=" + str(
+            page_number) + "&show=96"
+        print("started")
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context()
+        page = await context.new_page()
+        await stealth_async(page)
+        await page.goto(page_url)
+        time.sleep(5)
+        all_product_names = []
+        while True:
+            print("\n" + page.url)
+            time.sleep(3)
+            await page.wait_for_load_state('networkidle')
+            try:
+                await page.wait_for_selector('.facets-item-cell-grid-title')
+            except:
+                if bad_counter >= 3:
+                    return
+                bad_counter += 1
+                continue
+            # Extract the product names from the current page
+            product_names = await page.evaluate('''() => {
+                        const names = [];
+                        document.querySelectorAll('.facets-item-cell-grid-title').forEach(element => {
+                            names.push(element.href.trim());
+                        });
+                        return names;
+                    }''')
+            for link in product_names:
+                try:
+                    if bad_counter >= 3:
+                        continue
+                    if "kit" in link:
+                        continue
+                    try:
+                        await page.goto(link)
+                    except Exception as e:
+                        continue
+                    await page.wait_for_load_state('networkidle')
+                    product_name = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-full-content-header-title');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_name == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_price = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-views-price-lead');
+                                return element ? element.textContent.trim() : 'Name not found';
+                            }''')
+                    if product_price == "Name not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        bad_counter += 1
+                        continue
+
+                    product_image_url = await page.evaluate('''() => {
+                                const element = document.querySelector('.product-details-image-gallery link[itemprop="image"]');
+                                return element ? element.getAttribute('href') : 'Image not found';
+                            }''')
+                    product_image_url = product_image_url.replace(' ', '%20')
+                    if product_image_url == "Image not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    product_manufacturer_name = await page.evaluate('''() => {
+                                        const element = document.querySelector('.item-details-manufacturer');
+                                        return element ? element.textContent.trim() : 'Brand text not found';
+                                    }''')
+                    product_manufacturer_name = product_manufacturer_name[16:]
+                    if product_manufacturer_name == "Brand text not found":
+                        await page.goto(page_url)
+                        await page.wait_for_load_state('networkidle')
+                        continue
+                    new_part = Part.Part(product_name, product_price,
+                                         product_image_url,
+                                         page.url,
+                                         product_manufacturer_name,
+                                         upper=False,
+                                         charging_handle=False,
+                                         lower=True, bcg=False,
+                                         attachment=False)
+                    generate_nano_id(new_part)
+                    print(new_part.__str__())
+                    parts.append({"id": new_part.id,
+                                  "name": new_part.name,
+                                  "price": float(
+                                      new_part.price[1:].replace(',', '')),
+                                  "image_url": new_part.image_url,
+                                  "url": new_part.url,
+                                  "manufacturer": new_part.manufacturer,
+                                  "upper": new_part.upper,
+                                  "charging_handle": new_part.charging_handle,
+                                  "bcg": new_part.bcg,
+                                  "lower": new_part.lower,
+                                  "attachment": new_part.attachment
+                                  })
+                    # parts_count += 1
+                    # if parts_count >= 2:
+                    #    break
+
+                    await page.goto(page_url)
+                    await page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    continue
+                # if parts_count >= 2:
+                #    break
+
+            try:
+                print(page.locator('.global-views-pagination-next'))
+                # print("Next: " + next_button_exists)
+                time.sleep(2)
+                page_number += 1
+                page_url = page_url[
+                           0:page_url.index("?page=")] + \
+                           "?page=" + str(page_number) + "&show=96"
+                await page.goto(page_url)
+            except:
+                print("Finished")
+                break
+
+
 async def retry_page(page, url):
     time.sleep(3)
     await page.goto(url, timeout=30000)
@@ -207,6 +734,18 @@ def upload_parts():
                     column='name', value=part["name"]).execute()
 
 
-asyncio.run(complete_rifles())
+#asyncio.run(complete_rifles())
+#upload_parts()
+parts = []
+asyncio.run(complete_lowers())
+upload_parts()
+parts = []
+asyncio.run(complete_uppers())
+upload_parts()
+parts = []
+asyncio.run(bcgs())
+upload_parts()
+parts = []
+asyncio.run(charging_handles())
 upload_parts()
 parts = []
